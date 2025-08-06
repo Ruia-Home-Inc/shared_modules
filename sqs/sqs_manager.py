@@ -1,0 +1,101 @@
+import os
+import time
+import logging
+from botocore.exceptions import BotoCoreError, ClientError
+from typing import Optional, Callable, Any, Dict, List
+from aws.aws_manager import AWSManager
+# Removed: from .config import settings
+
+logger = logging.getLogger(__name__)
+
+class SQSQueueManager(AWSManager):
+    def __init__(self, settings, queue_url: Optional[str] = None, queue_name: Optional[str] = None, region: Optional[str] = None):
+        # Initialize the parent AWSManager with SQS service
+        super().__init__('sqs', region)
+        self.settings = settings
+        # Determine queue_url
+        if queue_url:
+            self.queue_url = queue_url
+        elif queue_name:
+            try:
+                response = self.client.get_queue_url(QueueName=queue_name)
+                self.queue_url = response['QueueUrl']
+            except (BotoCoreError, ClientError) as e:
+                self._handle_aws_error(e, f"get queue URL for {queue_name}")
+                raise
+        else:
+            self.queue_url = self.settings.sqs_queue_url
+            if not self.queue_url:
+                raise ValueError('SQS_QUEUE_URL must be set in settings, or pass queue_url or queue_name to SQSQueueManager.')
+
+    def send_message(self, message_body: str, message_attributes: Optional[Dict[str, Any]] = None) -> Optional[str]:
+        try:
+            params = {
+                'QueueUrl': self.queue_url,
+                'MessageBody': message_body
+            }
+            if message_attributes:
+                params['MessageAttributes'] = message_attributes
+            response = self.client.send_message(**params)
+            logger.info(f"Message sent to SQS: {response.get('MessageId')}")
+            return response.get('MessageId')
+        except (BotoCoreError, ClientError) as e:
+            self._handle_aws_error(e, "send message")
+            return None
+
+    def receive_messages(self, max_number: int = 1, wait_time: int = 10, visibility_timeout: int = 30) -> List[Dict[str, Any]]:
+        try:
+            response = self.client.receive_message(
+                QueueUrl=self.queue_url,
+                MaxNumberOfMessages=max_number,
+                WaitTimeSeconds=wait_time,  # Long polling
+                VisibilityTimeout=visibility_timeout,
+                MessageAttributeNames=['All']
+            )
+            messages = response.get('Messages', [])
+            logger.info(f"Received {len(messages)} messages from SQS.")
+            return messages
+        except (BotoCoreError, ClientError) as e:
+            self._handle_aws_error(e, "receive messages")
+            return []
+
+    def delete_message(self, receipt_handle: str) -> bool:
+        try:
+            self.client.delete_message(
+                QueueUrl=self.queue_url,
+                ReceiptHandle=receipt_handle
+            )
+            logger.info("Message deleted from SQS.")
+            return True
+        except (BotoCoreError, ClientError) as e:
+            self._handle_aws_error(e, "delete message")
+            return False
+
+    def poll_queue(self, handler: Callable[[Dict[str, Any]], None], poll_interval: int = 1):
+        """
+        Continuously poll the SQS queue and process messages with the handler function.
+        handler: function that takes a message dict and processes it.
+        poll_interval: seconds to wait between polls if no messages are found.
+        """
+        logger.info("Starting SQS queue polling...")
+        while True:
+            messages = self.receive_messages(max_number=10, wait_time=10)
+            if not messages:
+                time.sleep(poll_interval)
+                continue
+            for message in messages:
+                try:
+                    handler(message)
+                    self.delete_message(message['ReceiptHandle'])
+                except Exception as e:
+                    logger.error(f"Error processing message: {e}")
+
+
+# Example usage:
+# def process_message(msg):
+#     print("Processing message:", msg['Body'])
+#
+# if __name__ == "__main__":
+#     manager = SQSQueueManager(queue_name='my-queue-name')
+#     manager.send_message("Hello SQS!")
+#     manager.poll_queue(process_message) 
