@@ -1,8 +1,17 @@
 import os
 import logging
+
+from typing import Optional, Dict, Any
+
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
-from typing import Optional, Dict, Any
+
+from app.core.config import settings
+
+
+AWS_ACCESS_KEY_ID = settings.aws_access_key_id
+AWS_SECRET_ACCESS_KEY = settings.aws_secret_access_key
+AWS_REGION = settings.aws_region
 
 
 logger = logging.getLogger(__name__)
@@ -13,26 +22,18 @@ class AWSManager:
     Provides common AWS configuration and client setup.
     """
     
-    def __init__(
-        self,
-        service_name: str,
-        aws_access_key_id: str,
-        aws_secret_access_key: str,
-        region: Optional[str] = None
-    ):
+    def __init__(self, service_name: str, region: Optional[str] = None):
         """
         Initialize AWS manager with common configuration.
         
         Args:
             service_name: The AWS service name (e.g., 'sqs', 's3', 'dynamodb')
-            aws_access_key_id: AWS access key ID
-            aws_secret_access_key: AWS secret access key
-            region: AWS region (optional)
+            region: AWS region (defaults to AWS_REGION env var or 'us-east-1')
         """
         self.service_name = service_name
-        self.aws_access_key_id = aws_access_key_id
-        self.aws_secret_access_key = aws_secret_access_key
-        self.aws_region = region or os.environ.get('AWS_REGION', 'us-east-1')
+        self.aws_access_key_id = AWS_ACCESS_KEY_ID
+        self.aws_secret_access_key = AWS_SECRET_ACCESS_KEY
+        self.aws_region = region or AWS_REGION
         
         # Validate required credentials
         if not self.aws_access_key_id or not self.aws_secret_access_key:

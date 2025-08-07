@@ -1,18 +1,22 @@
+import logging
 import os
 import time
-import logging
+from typing import Any, Callable, Dict, List, Optional
+
 from botocore.exceptions import BotoCoreError, ClientError
-from typing import Optional, Callable, Any, Dict, List
-from aws.aws_manager import AWSManager
-# Removed: from .config import settings
+
+from app.core.config import settings
+from app.shared_modules import AWSManager
 
 logger = logging.getLogger(__name__)
+SQS_QUEUE_URL = settings.sqs_queue_url
+
 
 class SQSQueueManager(AWSManager):
-    def __init__(self, settings, queue_url: Optional[str] = None, queue_name: Optional[str] = None, region: Optional[str] = None):
+    def __init__(self, queue_url: Optional[str] = None, queue_name: Optional[str] = None, region: Optional[str] = None):
         # Initialize the parent AWSManager with SQS service
         super().__init__('sqs', region)
-        self.settings = settings
+        
         # Determine queue_url
         if queue_url:
             self.queue_url = queue_url
@@ -24,9 +28,9 @@ class SQSQueueManager(AWSManager):
                 self._handle_aws_error(e, f"get queue URL for {queue_name}")
                 raise
         else:
-            self.queue_url = self.settings.sqs_queue_url
+            self.queue_url = SQS_QUEUE_URL
             if not self.queue_url:
-                raise ValueError('SQS_QUEUE_URL must be set in settings, or pass queue_url or queue_name to SQSQueueManager.')
+                raise ValueError('SQS_QUEUE_URL must be set as an environment variable, or pass queue_url or queue_name to SQSQueueManager.')
 
     def send_message(self, message_body: str, message_attributes: Optional[Dict[str, Any]] = None) -> Optional[str]:
         try:
