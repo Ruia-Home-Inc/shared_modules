@@ -5,7 +5,7 @@ from typing import Any, BinaryIO, Dict, List, Optional
 import pandas as pd
 from botocore.exceptions import BotoCoreError, ClientError
 
-from app.core.aws_manager import AWSManager
+from app.shared_modules.aws_manager import AWSManager
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
