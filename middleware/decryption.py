@@ -25,7 +25,7 @@ if len(SECRET_KEY) != 32:
     raise ValueError("ENCRYPTION_KEY must be exactly 32 bytes for AES-256-GCM")
 
 
-class AESGCMDecryptionMiddleware(BaseHTTPMiddleware):
+class DecryptionMiddleware(BaseHTTPMiddleware):
     """Middleware to decrypt AES-GCM encrypted request body on specific endpoints"""
 
     def __init__(self, app: ASGIApp):
