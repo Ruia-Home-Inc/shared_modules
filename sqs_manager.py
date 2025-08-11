@@ -126,6 +126,23 @@ class SQSQueueManager(AWSManager):
         except (BotoCoreError, ClientError, ValueError) as e:
             self._handle_aws_error(e, f"create FIFO queue {queue_name}")
             return None
+    
+    def send_message(self, message_body: str, message_attributes: Optional[Dict[str, Any]] = None, message_group_id: Optional[str]=None) -> Optional[str]:
+        try:
+            params = {
+                'QueueUrl': self.queue_url,
+                'MessageBody': message_body
+            }
+            if message_attributes:
+                params['MessageAttributes'] = message_attributes
+            if message_group_id:
+                params['MessageGroupId'] = message_group_id
+            response = self.client.send_message(**params)
+            logger.info(f"Message sent to SQS: {response.get('MessageId')}")
+            return response.get('MessageId')
+        except (BotoCoreError, ClientError) as e:
+            self._handle_aws_error(e, "send message")
+            return None
 
 
 # Example usage:
