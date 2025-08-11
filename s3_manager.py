@@ -1,12 +1,16 @@
+import csv
+import io
 import logging
 from io import BytesIO, StringIO
-from typing import Any, BinaryIO, Dict, List, Optional
+from typing import Any, BinaryIO, Callable, Dict, List, Optional
 
 import pandas as pd
+from openpyxl import load_workbook
 from botocore.exceptions import BotoCoreError, ClientError
 
-from app.shared_modules.aws_manager import AWSManager
 from app.core.config import settings
+from app.shared_modules.aws_manager import AWSManager
+
 
 logger = logging.getLogger(__name__)
 S3_BUCKET_NAME = settings.s3_bucket_name
@@ -274,3 +278,90 @@ class S3Manager(AWSManager):
         except (BotoCoreError, ClientError, Exception) as e:
             self._handle_aws_error(e, f"read Excel from {bucket}/{object_key}")
             return None
+    
+
+    def read_csv_excel_file(
+        self,
+        file_type: str,
+        object_key: str,
+        batch_size: int = 500,
+        row_callback: Optional[Callable[[List[Dict[str, Any]]], None]] = None,
+        bucket_name: Optional[str] = None,
+    ) -> None:
+        """
+        Stream a CSV or Excel file from S3 in batches and process rows incrementally.
+
+        Args:
+            file_type: 'csv' or 'excel'
+            object_key: S3 object key (path in bucket)
+            batch_size: Number of rows per batch
+            row_callback: Function to call with each batch (List[Dict[str, Any]])
+            bucket_name: Optional S3 bucket name (defaults to self.bucket_name)
+        """
+        bucket = bucket_name or self.bucket_name
+
+        if row_callback is None:
+
+            def default_callback(batch: List[Dict[str, Any]]) -> None:
+                logger.info(f"Processed batch of {len(batch)} rows")
+
+            row_callback = default_callback
+
+        try:
+            response = self.client.get_object(Bucket=bucket, Key=object_key)
+            body = response["Body"]
+
+            if file_type.lower() == "csv":
+                # Stream CSV from S3 without loading into memory
+                stream = io.TextIOWrapper(body, encoding="utf-8")
+                reader = csv.DictReader(stream)
+
+                batch = []
+                for row in reader:
+                    batch.append(row)
+                    if len(batch) >= batch_size:
+                        row_callback(batch)
+                        batch = []
+                if batch:
+                    row_callback(batch)
+
+            elif file_type.lower() == "excel":
+                # Download Excel and use read_only mode for memory efficiency
+                file_stream = io.BytesIO(body.read())
+                wb = load_workbook(file_stream, read_only=True)
+
+                if not wb.sheetnames:
+                    raise ValueError(f"No sheets found in Excel file: {object_key}")
+
+                ws = wb.active
+                if ws is None:
+                    raise ValueError(
+                        f"Active sheet not found in Excel file: {object_key}"
+                    )
+
+                header_row = next(
+                    ws.iter_rows(min_row=1, max_row=1, values_only=True), None
+                )
+                if not header_row:
+                    raise ValueError(f"No header row found in Excel file: {object_key}")
+
+                headers = list(header_row)
+                batch = []
+
+                for row in ws.iter_rows(min_row=2, values_only=True):
+                    row_dict = dict(zip(headers, row))
+                    batch.append(row_dict)
+                    if len(batch) >= batch_size:
+                        row_callback(batch)
+                        batch = []
+                if batch:
+                    row_callback(batch)
+
+            else:
+                raise ValueError(f"Unsupported file type: {file_type}")
+
+            logger.info(f"Finished processing s3://{bucket}/{object_key}")
+
+        except Exception as e:
+            self._handle_aws_error(e, f"stream tabular file from {bucket}/{object_key}")
+
