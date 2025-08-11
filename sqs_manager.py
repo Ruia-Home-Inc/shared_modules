@@ -93,6 +93,39 @@ class SQSQueueManager(AWSManager):
                     self.delete_message(message['ReceiptHandle'])
                 except Exception as e:
                     logger.error(f"Error processing message: {e}")
+    
+    def create_fifo_queue(self, queue_name: str ):
+        try:
+            if not queue_name.endswith('.fifo'):
+                raise ValueError("FIFO queue name must end with '.fifo'")
+           
+            try:
+                response = self.client.get_queue_url(QueueName=queue_name)
+                queue_url = response['QueueUrl']
+                logger.info(f"Queue already exists: {queue_url}")
+                self.queue_url = queue_url
+                return queue_url
+           
+            except self.client.exceptions.QueueDoesNotExist:
+                pass
+           
+            attributes = {
+                'FifoQueue': 'true',
+                'ContentBasedDeduplication': 'true'
+            }
+ 
+            response = self.client.create_queue(
+                QueueName=queue_name,
+                Attributes=attributes
+            )
+ 
+            queue_url = response['QueueUrl']
+            self.queue_url = queue_url
+            return queue_url
+ 
+        except (BotoCoreError, ClientError, ValueError) as e:
+            self._handle_aws_error(e, f"create FIFO queue {queue_name}")
+            return None
 
 
 # Example usage:
