@@ -12,11 +12,11 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 # Decode and validate encryption key (must be 32 bytes after base64 decoding)
-if not settings.ENCRYPTION_KEY:
+if not settings.encryption_key:
     raise RuntimeError("ENCRYPTION_KEY not set in environment")
 
 try:
-    DECRYPTION_KEY = base64.b64decode(settings.ENCRYPTION_KEY)
+    DECRYPTION_KEY = base64.b64decode(settings.encryption_key)
 except Exception:
     raise ValueError("ENCRYPTION_KEY must be base64-encoded")
 
@@ -29,7 +29,7 @@ class DecryptionMiddleware:
 
     def __init__(self, app: ASGIApp):
         self.app = app
-        self.decrypt_paths = settings.DECRYPT_PATHS or []
+        self.decrypt_paths = settings.decrypt_paths or []
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         # Only process HTTP POST requests matching configured paths
