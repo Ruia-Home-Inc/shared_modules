@@ -280,7 +280,7 @@ class S3Manager(AWSManager):
             self._handle_aws_error(e, f"read Excel from {bucket}/{object_key}")
             return None
     
-    def read_csv_excel_file(
+    async def read_csv_excel_file(
         self,
         file_type: str,
         object_key: str,
@@ -309,9 +309,10 @@ class S3Manager(AWSManager):
                     bucket = bucket_name or self.bucket_name
                     self.client.download_fileobj(bucket, object_key, tmp_file)
                     file_path = tmp_file.name
-                    tmp_file_path = file_path  # store temp file path for cleanup
+
 
             print(f"Processing file: {file_path}")
+            tmp_file_path = file_path  # store temp file path for cleanup
             # Process CSV
             if file_type.lower() == "csv":
                 with open(file_path, mode="r", encoding="utf-8") as f:
@@ -320,10 +321,10 @@ class S3Manager(AWSManager):
                     for row in reader:
                         batch.append(row)
                         if len(batch) >= batch_size:
-                            row_callback(batch)
+                            await row_callback(batch)
                             batch = []
                     if batch:
-                        row_callback(batch)
+                        await row_callback(batch)
 
             # Process Excel
             elif file_type.lower() == "excel":
@@ -344,10 +345,10 @@ class S3Manager(AWSManager):
                     row_dict = dict(zip(headers, row))
                     batch.append(row_dict)
                     if len(batch) >= batch_size:
-                        row_callback(batch)
+                        await row_callback(batch)
                         batch = []
                 if batch:
-                    row_callback(batch)
+                    await row_callback(batch)
 
             else:
                 raise ValueError(f"Unsupported file type: {file_type}")

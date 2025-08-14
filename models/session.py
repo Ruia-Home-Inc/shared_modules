@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.shared_modules.db import Base
+from app.shared_modules.models.user import User # noqa: F401
 
 class Session(Base):
     """Session model - stores session details"""
