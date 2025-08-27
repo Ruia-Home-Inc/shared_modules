@@ -97,6 +97,15 @@ API_PERMISSIONS = {
 
 class EmailType(str, Enum):
     """Email types supported by the notification service"""
-    WELCOME = "welcome"
-    SIGNUP_OTP = "signup_otp"
-    INVITE = "invite"
+    WELCOME = "welcome-email"
+    SIGNUP_OTP = "signup_otp-email"
+    INVITE = "invite-email"
+
+
+
+class Modules(str, Enum):
+    """Supported modules in the system"""
+    ITEMS_MASTER = "items-master"
+    USER_MANAGEMENT = "user-management"
+    FREIGHT_RATE = "freight-rate"  # corrected spelling
+    # Add more modules here if needed

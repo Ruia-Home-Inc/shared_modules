@@ -1,38 +1,49 @@
-import httpx
 from typing import Dict, Any
+from pydantic import BaseModel, EmailStr, Field, ValidationError
 
+import httpx
 from app.core.config import settings
 
-EMAIL_SERVICE_URL= settings.email_service_url
+EMAIL_SERVICE_URL = settings.email_service_url
+
+# Define Pydantic model for email payload
+class EmailPayload(BaseModel):
+    type: str
+    to_email: EmailStr  # validates proper email format
+    payload: Dict[str, Any]
+    action_triggered_user: Dict[str, Any]
+    module: str
+    module_identifier: str
+
 
 async def send_email(
     email_type: str,
     to_email: str,
     payload: Dict[str, Any],
     user: Dict[str, Any],
+    module: str,
+    module_identifier: str,
 ) -> Dict[str, Any]:
     """
-    Sends an email via the email-service.
-
-    Args:
-        user_id (str): ID of the user triggering the email.
-        email_type (str): Type of the email (e.g., signup_otp, reset_password).
-        to_email (str): Recipient email address.
-        payload (dict): Dynamic payload for the email template.
-        user (dict): User metadata.
-
-    Returns:
-        dict: JSON response from the email service.
+    Sends an email via the email-service after validating the payload.
     """
     data = {
         "type": email_type,
         "to_email": to_email,
         "payload": payload,
-        "user": user,
+        "action_triggered_user": user,
+        "module": module,
+        "module_identifier": module_identifier,
     }
-    print("Sending email with data:", data)
-    print("emai url", EMAIL_SERVICE_URL)
+
+    # Validate the data
+    try:
+        validated_data = EmailPayload(**data)
+    except ValidationError as e:
+        print("Email payload validation failed:", e.json())
+        raise ValueError(f"Invalid email payload: {e}")
+
     async with httpx.AsyncClient() as client:
-        response = await client.post(EMAIL_SERVICE_URL, json=data)
-        response.raise_for_status()  # Raise exception if status code >=400
+        response = await client.post(EMAIL_SERVICE_URL, json=validated_data.dict())
+        response.raise_for_status()
         return response.json()
