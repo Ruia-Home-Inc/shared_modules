@@ -1,3 +1,5 @@
+from enum import Enum
+
 class UserInviteStatus:
     ACTIVE = "active"
     EXPIRED = "expired"
@@ -90,3 +92,11 @@ API_PERMISSIONS = {
     "check_template_name":["user_management:view"],
     "bulk_status_update":["user_management:edit"]
 }
+
+
+
+class EmailType(str, Enum):
+    """Email types supported by the notification service"""
+    WELCOME = "welcome"
+    SIGNUP_OTP = "signup_otp"
+    INVITE = "invite"
