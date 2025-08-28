@@ -34,3 +34,22 @@ def check_password(value: str, field_name: str) -> str:
     if not re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()]).+$', value):
         raise ValueError(f"{field_name} should contain at least 1 uppercase letter,smallcase letter, digit and a special character")
     return value
+
+def validate_comments_required(action_key, comments, required_action_key, error_message: str):
+    if action_key == required_action_key:
+        if not comments or len(comments) == 0:
+            raise ValueError(error_message)
+ 
+def check_date_range(valid_from: datetime | None, valid_to: datetime | None) -> None:                       
+    today = datetime.now().date()
+ 
+    if valid_from and valid_to:
+        if valid_to < valid_from:
+            raise ValueError(
+                f"given date {valid_to.date()} should not be earlier than {valid_from.date()}"
+            )
+    elif valid_to:
+        if valid_to.date() < today:
+            raise ValueError(
+                f"given date {valid_to.date()} should not be earlier than today {today}"
+            )
