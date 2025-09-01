@@ -126,6 +126,7 @@ class EmailType(str, Enum):
     WELCOME = "welcome-email"
     SIGNUP_OTP = "signup_otp-email"
     INVITE = "invite-email"
+    PASSWORD_RESET = "password_reset-email"
 
 
 
