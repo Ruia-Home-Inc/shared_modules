@@ -72,6 +72,8 @@ class RoleTypes:
             cls.GLOBAL
         ]
 
+
+
 API_PERMISSIONS = {
     "user_invite": ["user_management:create"],
     "get_users": ["user_management:view"],
@@ -90,7 +92,31 @@ API_PERMISSIONS = {
     "user_delete": ["user_management:delete"],
     "bulk_delete":["user_management:delete"],
     "check_template_name":["user_management:view"],
-    "bulk_status_update":["user_management:edit"]
+    "bulk_status_update":["user_management:edit"],
+ 
+    "add_freight_rate":["freight_rate:create"],
+    "update_freight_rate":["freight_rate:edit"],
+    "list_freight_rates":["freight_rate:view"],
+    "get_freight_rate_by_id":["freight_rate:view"],
+    "bulk_freight_rate_status_change":["freight_rate:enable_disable"],
+    "add_container_type":["freight_rate:create"],
+    "delete_container_type":["freight_rate:delete"],
+    "list_container_types":["freight_rate:view"],
+    "add_freight_rate_comment":["freight_rate:create"],
+    "list_freight_rate_comments":["freight_rate:view"],
+    "freight_change_history":["freight_rate:view"],
+    "freight_rate_change":["freight_rate:view"],
+ 
+    "add_tariff_rate":["tariff_rate:create"],
+    "update_tariff_rate":["tariff_rate:edit"],
+    "list_tariff_rates":["tariff_rate:view"],
+    "get_tariff_rate_by_id":["tariff_rate:view"],
+    "bulk_tariff_rate_status_change":["tariff_rate:enable_disable"],
+    "add_tariff_rate_comment":["tariff_rate:create"],
+    "list_tariff_rate_comments":["tariff_rate:view"],
+    "tariff_change_history":["tariff_rate:view"],
+    "tariff_rate_change":["tariff_rate:view"]
+ 
 }
 
 
