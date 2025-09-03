@@ -4,9 +4,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.shared_modules.constant import API_PERMISSIONS, TenantUserStatus
-from app.shared_modules.db import get_postgres_db
-from app.shared_modules.models import TenantUser
+from ..constant import API_PERMISSIONS, TenantUserStatus
+from ..db import get_postgres_db
+from ..models import TenantUser
 
 
 async def check_api_permissions(db: AsyncSession, api_name: str, current_user: Dict[str, Any]) -> None:

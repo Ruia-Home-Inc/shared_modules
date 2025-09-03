@@ -11,7 +11,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 from openpyxl import load_workbook
 
 from app.core.config import settings
-from app.shared_modules.aws_manager import AWSManager
+from .aws_manager import AWSManager
 
 logger = logging.getLogger(__name__)
 S3_BUCKET_NAME = settings.s3_bucket_name

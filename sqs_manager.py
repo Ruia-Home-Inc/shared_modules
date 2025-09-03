@@ -6,7 +6,7 @@ from typing import Any, Callable, Dict, List, Optional
 from botocore.exceptions import BotoCoreError, ClientError
 
 from app.core.config import settings
-from app.shared_modules.aws_manager import AWSManager
+from .aws_manager import AWSManager
 
 logger = logging.getLogger(__name__)
 SQS_QUEUE_URL = settings.sqs_queue_url

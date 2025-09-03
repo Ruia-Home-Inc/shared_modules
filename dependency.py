@@ -11,10 +11,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.shared_modules.cacheManager import cache_manager
-from app.shared_modules.db import get_postgres_db
-from app.shared_modules.models import Session, TenantUser
-from app.shared_modules.schemas.common import UserData, UserResponse
+from .cacheManager import cache_manager
+from .db import get_postgres_db
+from .models import Session, TenantUser
+from .schemas.common import UserData, UserResponse
 
 logger = logging.getLogger(__name__)
 
