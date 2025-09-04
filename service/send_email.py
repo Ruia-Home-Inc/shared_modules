@@ -20,18 +20,20 @@ async def send_email(
     email_type: str,
     to_email: str,
     payload: Dict[str, Any],
-    user: Dict[str, Any],
+    action_triggered_user: Dict[str, Any],
     module: str,
     module_identifier: str,
 ) -> Dict[str, Any]:
     """
     Sends an email via the email-service after validating the payload.
     """
+
+
     data = {
         "type": email_type,
         "to_email": to_email,
         "payload": payload,
-        "action_triggered_user": user,
+        "action_triggered_user": action_triggered_user,
         "module": module,
         "module_identifier": module_identifier,
     }
@@ -39,6 +41,7 @@ async def send_email(
     # Validate the data
     try:
         validated_data = EmailPayload(**data)
+        print("Email payload validated successfully:", validated_data.json())
     except ValidationError as e:
         print("Email payload validation failed:", e.json())
         raise ValueError(f"Invalid email payload: {e}")
