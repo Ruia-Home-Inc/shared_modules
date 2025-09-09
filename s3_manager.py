@@ -6,7 +6,7 @@ import tempfile
 from io import BytesIO, StringIO
 from typing import Any, BinaryIO, Callable, Dict, List, Optional
 
-import pandas as pd
+import polars as pl
 from botocore.exceptions import BotoCoreError, ClientError
 from openpyxl import load_workbook
 
@@ -250,9 +250,9 @@ class S3Manager(AWSManager):
             self._handle_aws_error(e, "connection test")
             return False 
 
-    def read_tabular_file(self, file_type: str, object_key: str, bucket_name: Optional[str] = None) -> Optional[pd.DataFrame]:
+    def read_tabular_file(self, file_type: str, object_key: str, bucket_name: Optional[str] = None) -> Optional[pl.DataFrame]:
         """
-        Read a CSV or Excel file from S3 into a Pandas DataFrame.
+        Read a CSV or Excel file from S3 into a Polars DataFrame.
 
         Args:
             object_key: S3 object key (path in bucket)
@@ -260,24 +260,42 @@ class S3Manager(AWSManager):
             bucket_name: Optional S3 bucket name (defaults to self.bucket_name)
 
         Returns:
-            Pandas DataFrame if successful, None otherwise.
+            Polars DataFrame if successful, None otherwise.
         """
         bucket = bucket_name or self.bucket_name
         try:
             response = self.client.get_object(Bucket=bucket, Key=object_key)
             content = response['Body'].read()
-            if file_type == 'csv':
+
+            if file_type.lower() == 'csv':
                 decoded = content.decode('utf-8')
-                df = pd.read_csv(StringIO(decoded))
-            elif file_type == 'excel':
-                df = pd.read_excel(BytesIO(content), engine='openpyxl')
+                df = pl.read_csv(StringIO(decoded))
+            elif file_type.lower() == 'excel':
+                # Polars doesn't natively read Excel, so we use openpyxl to parse
+                # and then convert rows into a Polars DataFrame.
+                wb = load_workbook(BytesIO(content), read_only=True)
+                ws = wb.active if wb.active is not None else wb[wb.sheetnames[0]]
+
+                header_row = next(ws.iter_rows(min_row=1, max_row=1, values_only=True), None)
+                if not header_row:
+                    logger.error(f"No header row found in Excel file: {object_key}")
+                    return None
+
+                headers = list(header_row)
+                rows = []
+                for row in ws.iter_rows(min_row=2, values_only=True):
+                    rows.append(row)
+
+                df = pl.DataFrame(rows, schema=headers)
             else:
                 logger.error(f"Unsupported file type: {file_type}")
                 return None
-            logger.info(f"Excel file read from s3://{bucket}/{object_key}")
+
+            logger.info(f"Tabular file read from s3://{bucket}/{object_key} using Polars")
             return df
+
         except (BotoCoreError, ClientError, Exception) as e:
-            self._handle_aws_error(e, f"read Excel from {bucket}/{object_key}")
+            self._handle_aws_error(e, f"read {file_type} from {bucket}/{object_key}")
             return None
     
     async def read_csv_excel_file(
