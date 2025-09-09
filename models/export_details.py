@@ -17,7 +17,7 @@ class ExportStatus(str, Enum):
 
 class ExportDetail(Base):
     __tablename__ = "export_details"
-    __table_args__ = {"schema": "export_details"}
+    __table_args__ = {"schema": "export"}
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
     module_name = Column(String, nullable=False)
