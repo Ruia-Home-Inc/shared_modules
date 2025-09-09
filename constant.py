@@ -134,5 +134,12 @@ class Modules(str, Enum):
     """Supported modules in the system"""
     ITEMS_MASTER = "items-master"
     USER_MANAGEMENT = "user-management"
-    FREIGHT_RATE = "freight-rate"  # corrected spelling
+    FREIGHT_RATE = "freight-rate"
+    FX_RATE = "fx-rate"
+    TARIFF_RATE = "tariff-rate"
+
     # Add more modules here if needed
+
+class Features(str, Enum):
+    """Supported modules in the system"""
+    SENARIO_BUILDER = "senario-builder"
