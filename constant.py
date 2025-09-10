@@ -115,9 +115,31 @@ API_PERMISSIONS = {
     "add_tariff_rate_comment":["tariff_rate:create"],
     "list_tariff_rate_comments":["tariff_rate:view"],
     "tariff_change_history":["tariff_rate:view"],
-    "tariff_rate_change":["tariff_rate:view"]
+    "tariff_rate_change":["tariff_rate:view"],
+
+    "upload_to_s3": {
+        "freight_rate": ["freight_rate:import"],
+        "tariff_rate": ["tariff_rate:import"],
+    },
+   
+    "upload_summary_counts":{
+        "freight_rate": ["freight_rate:view"],
+        "tariff_rate": ["tariff_rate:view"],
+    },
+ 
+    "get_feature_template":{
+        "freight_rate": ["freight_rate:view"],
+        "tariff_rate": ["tariff_rate:view"],
+    },
+    "list_uploads":{
+        "freight_rate": ["freight_rate:view"],
+        "tariff_rate": ["tariff_rate:view"],
+    }
  
 }
+
+ 
+
 
 
 
