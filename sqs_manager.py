@@ -45,7 +45,7 @@ class SQSQueueManager(AWSManager):
             logger.info(f"Received {len(messages)} messages from SQS.")
             return messages
         except (BotoCoreError, ClientError) as e:
-            logger.error(f"Error while receiving message:", self.queue_url)
+            logger.error(f"Error while receiving message:{self.queue_url}")
             self._handle_aws_error(e, "receive messages")
             return []
         
