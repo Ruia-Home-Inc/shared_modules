@@ -113,7 +113,7 @@ class SQSQueueManager(AWSManager):
             self._handle_aws_error(e, f"create FIFO queue {queue_name}")
             return None
     
-def send_message(self, message_body: str, message_attributes: Optional[Dict[str, Any]] = None, message_group_id: Optional[str] = None) -> Optional[str]:
+    def send_message(self, message_body: str, message_attributes: Optional[Dict[str, Any]] = None, message_group_id: Optional[str] = None) -> Optional[str]:
         try:
             params = {
                 'QueueUrl': self.queue_url,
