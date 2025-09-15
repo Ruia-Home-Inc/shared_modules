@@ -59,6 +59,7 @@ class S3Manager(AWSManager):
             logger.info(f"File uploaded to s3://{bucket}/{object_key}")
             return True
         except (BotoCoreError, ClientError) as e:
+            logger.exception(f"Error receiving messages from SQS: {e}")
             self._handle_aws_error(e, f"upload file {file_path} to {bucket}/{object_key}")
             return False
     

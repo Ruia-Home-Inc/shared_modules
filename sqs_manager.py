@@ -32,21 +32,6 @@ class SQSQueueManager(AWSManager):
             if not self.queue_url:
                 raise ValueError('SQS_QUEUE_URL must be set as an environment variable, or pass queue_url or queue_name to SQSQueueManager.')
 
-    def send_message(self, message_body: str, message_attributes: Optional[Dict[str, Any]] = None) -> Optional[str]:
-        try:
-            params = {
-                'QueueUrl': self.queue_url,
-                'MessageBody': message_body
-            }
-            if message_attributes:
-                params['MessageAttributes'] = message_attributes
-            response = self.client.send_message(**params)
-            logger.info(f"Message sent to SQS: {response.get('MessageId')}")
-            return response.get('MessageId')
-        except (BotoCoreError, ClientError) as e:
-            self._handle_aws_error(e, "send message")
-            return None
-
     def receive_messages(self, max_number: int = 1, wait_time: int = 10, visibility_timeout: int = 30) -> List[Dict[str, Any]]:
         try:
             response = self.client.receive_message(
@@ -60,9 +45,10 @@ class SQSQueueManager(AWSManager):
             logger.info(f"Received {len(messages)} messages from SQS.")
             return messages
         except (BotoCoreError, ClientError) as e:
+            logger.error(f"Error while receiving message:{self.queue_url}")
             self._handle_aws_error(e, "receive messages")
             return []
-
+        
     def delete_message(self, receipt_handle: str) -> bool:
         try:
             self.client.delete_message(
@@ -127,7 +113,7 @@ class SQSQueueManager(AWSManager):
             self._handle_aws_error(e, f"create FIFO queue {queue_name}")
             return None
     
-    def send_message(self, message_body: str, message_attributes: Optional[Dict[str, Any]] = None, message_group_id: Optional[str]=None) -> Optional[str]:
+    def send_message(self, message_body: str, message_attributes: Optional[Dict[str, Any]] = None, message_group_id: Optional[str] = None) -> Optional[str]:
         try:
             params = {
                 'QueueUrl': self.queue_url,
