@@ -163,4 +163,4 @@ class Modules(str, Enum):
 
 class Features(str, Enum):
     """Supported modules in the system"""
-    SENARIO_BUILDER = "senario-builder"
+    SCENARIO_BUILDER = "scenario-builder"
