@@ -153,11 +153,11 @@ class EmailType(str, Enum):
 
 class Modules(str, Enum):
     """Supported modules in the system"""
-    ITEMS_MASTER = "items-master"
-    USER_MANAGEMENT = "user-management"
-    FREIGHT_RATE = "freight-rate"
-    FX_RATE = "fx-rate"
-    TARIFF_RATE = "tariff-rate"
+    ITEMS_MASTER = "items_master"
+    USER_MANAGEMENT = "user_management"
+    FREIGHT_RATE = "freight_rate"
+    FX_RATE = "fx_rate"
+    TARIFF_RATE = "tariff_rate"
 
     # Add more modules here if needed
 
