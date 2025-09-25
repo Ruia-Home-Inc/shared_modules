@@ -134,7 +134,12 @@ API_PERMISSIONS = {
     "list_uploads":{
         "freight_rate": ["freight_rate:view"],
         "tariff_rate": ["tariff:view"],
-    }
+    },
+
+    "raise_request": ["request:create"],
+    "review_request": ["request:review"],
+    "get_request_by_id": ["request:detailed_view"],
+    "list_requests": ["request:view"]
  
 }
  
