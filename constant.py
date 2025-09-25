@@ -107,33 +107,33 @@ API_PERMISSIONS = {
     "freight_change_history":["freight_rate:view"],
     "freight_rate_change":["freight_rate:view"],
  
-    "add_tariff_rate":["tariff:create"],
-    "update_tariff_rate":["tariff:edit"],
-    "list_tariff_rates":["tariff:view"],
-    "get_tariff_rate_by_id":["tariff:view"],
-    "bulk_tariff_rate_status_change":["tariff:enable_disable"],
-    "add_tariff_rate_comment":["tariff:create"],
-    "list_tariff_rate_comments":["tariff:view"],
-    "tariff_change_history":["tariff:view"],
-    "tariff_rate_change":["tariff:view"],
+    "add_tariff_rate":["tariff_rate:create"],
+    "update_tariff_rate":["tariff_rate:edit"],
+    "list_tariff_rates":["tariff_rate:view"],
+    "get_tariff_rate_by_id":["tariff_rate:view"],
+    "bulk_tariff_rate_status_change":["tariff_rate:enable_disable"],
+    "add_tariff_rate_comment":["tariff_rate:create"],
+    "list_tariff_rate_comments":["tariff_rate:view"],
+    "tariff_change_history":["tariff_rate:view"],
+    "tariff_rate_change":["tariff_rate:view"],
  
     "upload_to_s3": {
         "freight_rate": ["freight_rate:import"],
-        "tariff_rate": ["tariff:import"],
+        "tariff_rate": ["tariff_rate:import"],
     },
    
     "upload_summary_counts":{
         "freight_rate": ["freight_rate:view"],
-        "tariff_rate": ["tariff:view"],
+        "tariff_rate": ["tariff_rate:view"],
     },
  
     "get_feature_template":{
         "freight_rate": ["freight_rate:view"],
-        "tariff_rate": ["tariff:view"],
+        "tariff_rate": ["tariff_rate:view"],
     },
     "list_uploads":{
         "freight_rate": ["freight_rate:view"],
-        "tariff_rate": ["tariff:view"],
+        "tariff_rate": ["tariff_rate:view"],
     },
 
     "raise_request": ["request:create"],
