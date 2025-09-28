@@ -116,7 +116,14 @@ API_PERMISSIONS = {
     "list_tariff_rate_comments":["tariff_rate:view"],
     "tariff_change_history":["tariff_rate:view"],
     "tariff_rate_change":["tariff_rate:view"],
- 
+
+    "list_fx_rates":["fx_rate:view"],
+    "get_fx_rate_by_id":["fx_rate:detailed_view"],
+    "add_fx_rate_comment":["fx_rate:create"],
+    "list_fx_rate_comments":["fx_rate:view"],
+    "fx_change_history":["fx_rate:view"],
+    "fx_rate_change":["fx_rate:view"],
+
     "upload_to_s3": {
         "freight_rate": ["freight_rate:import"],
         "tariff_rate": ["tariff_rate:import"],
