@@ -1,6 +1,7 @@
 import csv
 import io
 import logging
+import mimetypes
 import os
 import tempfile
 from io import BytesIO, StringIO
@@ -77,8 +78,15 @@ class S3Manager(AWSManager):
         """
         bucket = bucket_name or self.bucket_name
         try:
-            self.client.upload_fileobj(file_obj, bucket, object_key)
-            logger.info(f"File object uploaded to s3://{bucket}/{object_key}")
+            content_type, _ = mimetypes.guess_type(object_key)
+            extra_args = {}
+            if content_type:
+                extra_args["ContentType"] = content_type
+            else:
+                extra_args["ContentType"] = "binary/octet-stream"
+
+            self.client.upload_fileobj(file_obj, bucket, object_key, ExtraArgs=extra_args)
+            logger.info(f"File uploaded to s3://{bucket}/{object_key} (ContentType={extra_args['ContentType']})")
             return True
         except (BotoCoreError, ClientError) as e:
             self._handle_aws_error(e, f"upload file object to {bucket}/{object_key}")
@@ -91,10 +99,18 @@ class S3Manager(AWSManager):
         """
         bucket = bucket_name or self.bucket_name
         try:
-            # Step 1: Create multipart upload
-            response = self.client.create_multipart_upload(Bucket=bucket, Key=object_key)
+            content_type, _ = mimetypes.guess_type(object_key)
+            if not content_type:
+                content_type = "binary/octet-stream"
+
+            # Step 1: Create multipart upload with explicit ContentType
+            response = self.client.create_multipart_upload(
+                Bucket=bucket,
+                Key=object_key,
+                ContentType=content_type
+            )
             upload_id = response['UploadId']
-            logger.info(f"Multipart upload started: UploadId={upload_id}")
+            logger.info(f"Multipart upload started: UploadId={upload_id}, ContentType={content_type}")
 
             part_number = 1
             parts = []
