@@ -151,9 +151,6 @@ API_PERMISSIONS = {
 }
  
 
-
-
-
 class EmailType(str, Enum):
     """Email types supported by the notification service"""
     WELCOME = "welcome-email"
@@ -175,4 +172,5 @@ class Modules(str, Enum):
 
 class Features(str, Enum):
     """Supported modules in the system"""
-    SCENARIO_BUILDER = "scenario_builder"
+    MAIN = "main"
+    AUDIT = "audit"
