@@ -1,55 +1,119 @@
 import re
 from datetime import datetime
- 
+from pydantic_core import PydanticCustomError
+
+def format_field_name(field_name: str) -> str:
+    """Convert snake_case field names to readable format."""
+    return field_name.replace('_', ' ').title() 
  
 def check_str(value: str, field_name: str) -> str:
+    """Validate string contains only alphanumeric characters and spaces."""
     if not re.match(r'^[a-zA-Z0-9_\s,]+$', value):
-        raise ValueError(f"{field_name} should contain only alphanumeric chars and space")
+        formatted_name = format_field_name(field_name)
+        raise PydanticCustomError(
+            'string_pattern',
+            f"{formatted_name} should contain only alphanumeric characters and spaces"
+        )
     return value
    
-def check_date_range(valid_from: datetime, valid_to: datetime) -> None:
-    if valid_to < valid_from:
-        raise ValueError(f"given date {valid_to} should not be earlier than {valid_from}")
+# def check_date_range(valid_from: datetime, valid_to: datetime) -> None:
+#     if valid_to < valid_from:
+#         raise ValueError(f"given date {valid_to} should not be earlier than {valid_from}")
    
 def check_comment(value: str, field_name: str) -> str:
+    """Validate comment field is non-empty and meets length requirements."""
+    formatted_name = format_field_name(field_name)
+    
     if not value or not value.strip():
-        raise ValueError(f"{field_name} must not be empty")  
+        raise PydanticCustomError(
+            'comment_empty',
+            f"{formatted_name} must not be empty"
+        )
+    
     value = value.strip()
+    
     if len(value) < 5:
-        raise ValueError(f"{field_name} must be at least 5 characters long")    
+        raise PydanticCustomError(
+            'comment_too_short',
+            f"{formatted_name} must be at least 5 characters long"
+        )
+    
     if not re.match(r'^[a-zA-Z0-9_\s,]+$', value):
-        raise ValueError(f"{field_name} must contain only alphanumeric characters, spaces, or underscores")
+        raise PydanticCustomError(
+            'comment_pattern',
+            f"{formatted_name} must contain only alphanumeric characters, spaces, commas, or underscores"
+        )
+    
     return value
  
 def check_otp(value: str, field_name: str) -> str:
+    """Validate OTP is a 6-digit code."""
     if not re.match(r'^\d{6}$', value):
-        raise ValueError(f"{field_name} should contain 6 digit code")
+        formatted_name = format_field_name(field_name)
+        raise PydanticCustomError(
+            'otp_pattern',
+            f"{formatted_name} should contain a 6-digit code"
+        )
+    return value
    
 def check_name(value: str, field_name: str) -> str:
+    """Validate name contains only alphabetic characters and spaces."""
     if not re.match(r'^[a-zA-Z\s]+$', value):
-        raise ValueError(f"{field_name} should contain only alphabet and space")
+        formatted_name = format_field_name(field_name)
+        raise PydanticCustomError(
+            'name_pattern',
+            f"{formatted_name} should contain only alphabetic characters and spaces"
+        )
     return value
  
 def check_password(value: str, field_name: str) -> str:
+    """Validate password meets complexity requirements."""
     if not re.match(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()]).+$', value):
-        raise ValueError(f"{field_name} should contain at least 1 uppercase letter,smallcase letter, digit and a special character")
+        formatted_name = format_field_name(field_name)
+        raise PydanticCustomError(
+            'password_pattern',
+            f"{formatted_name} should contain at least 1 uppercase letter, "
+            f"1 lowercase letter, 1 digit, and 1 special character"
+        )
     return value
 
-def validate_comments_required(action_key, comments, required_action_key, error_message: str):
+def validate_comments_required(
+    action_key: str, 
+    comments: str | None, 
+    required_action_key: str, 
+    error_message: str
+) -> None:
+    """Validate comments are provided when required for specific actions."""
     if action_key == required_action_key:
         if not comments or len(comments) == 0:
-            raise ValueError(error_message)
+            raise PydanticCustomError(
+                'comments_required',
+                error_message
+            )
+        
+def check_hs_code(value: str, field_name: str) -> str:
+    """Validate HS code is numeric."""
+    if not re.match(r'^\d+$', value):
+        formatted_name = format_field_name(field_name)
+        raise PydanticCustomError(
+            'hs_code_pattern',
+            f"{formatted_name} must be a number"
+        )
+    return value
  
-def check_date_range(valid_from: datetime | None, valid_to: datetime | None) -> None:                       
+def check_date_range(valid_from: datetime | None, valid_to: datetime | None) -> None:
+    """Validate date range is logical (valid_to >= valid_from)."""
     today = datetime.now().date()
- 
+    
     if valid_from and valid_to:
         if valid_to < valid_from:
-            raise ValueError(
-                f"given date {valid_to.date()} should not be earlier than {valid_from.date()}"
+            raise PydanticCustomError(
+                'date_range_invalid',
+                f"End date {valid_to.date()} should not be earlier than start date {valid_from.date()}"
             )
     elif valid_to:
         if valid_to.date() < today:
-            raise ValueError(
-                f"given date {valid_to.date()} should not be earlier than today {today}"
+            raise PydanticCustomError(
+                'date_past',
+                f"End date {valid_to.date()} should not be earlier than today ({today})"
             )
