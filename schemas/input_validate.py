@@ -8,7 +8,8 @@ def format_field_name(field_name: str) -> str:
  
 def check_str(value: str, field_name: str) -> str:
     """Validate string contains only alphanumeric characters and spaces."""
-    if not re.match(r'^[a-zA-Z0-9_\s,]+$', value):
+    pattern = r"^[a-zA-Z0-9\s,._\-–—']+$"
+    if not re.match(pattern, value):
         formatted_name = format_field_name(field_name)
         raise PydanticCustomError(
             'string_pattern',
