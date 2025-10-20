@@ -93,8 +93,9 @@ def validate_comments_required(
             )
         
 def check_hs_code(value: str, field_name: str) -> str:
-    """Validate HS code is numeric."""
-    if not re.match(r'^\d+$', value):
+    """Validate HS code is numeric and remove decimal portion."""
+    cleaned_value = value.split('.')[0]
+    if not re.match(r'^\d+$', cleaned_value):
         formatted_name = format_field_name(field_name)
         raise PydanticCustomError(
             'hs_code_pattern',
