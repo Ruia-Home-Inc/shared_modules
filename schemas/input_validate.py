@@ -93,15 +93,15 @@ def validate_comments_required(
             )
         
 def check_hs_code(value: str, field_name: str) -> str:
-    """Validate HS code is numeric and remove decimal portion."""
-    cleaned_value = value.split('.')[0]
+    """Validate HS code is numeric and remove all decimal points."""
+    cleaned_value = value.replace('.', '')
     if not re.match(r'^\d+$', cleaned_value):
         formatted_name = format_field_name(field_name)
         raise PydanticCustomError(
             'hs_code_pattern',
             f"{formatted_name} must be a number"
         )
-    return value
+    return cleaned_value
  
 def check_date_range(valid_from: datetime | None, valid_to: datetime | None) -> None:
     """Validate date range is logical (valid_to >= valid_from)."""
