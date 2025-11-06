@@ -116,6 +116,12 @@ API_PERMISSIONS = {
     "list_tariff_rate_comments":["tariff_rate:view"],
     "tariff_change_history":["tariff_rate:view"],
     "tariff_rate_change":["tariff_rate:view"],
+    
+    "add_item_bulk_insert":["item_master:create"],
+    "update_item_service":["item_master:edit"],
+    "delete_item":["item_master:delete"],
+    "add_item_comment":["item_master:create"],
+    "list_items":["item_master:view"],
 
     "list_fx_rates":["fx_rate:view"],
     "get_fx_rate_by_id":["fx_rate:detailed_view"],
@@ -127,11 +133,13 @@ API_PERMISSIONS = {
     "upload_to_s3": {
         "freight_rate": ["freight_rate:import"],
         "tariff_rate": ["tariff_rate:import"],
+        "item_master":["item_master:import"],
     },
    
     "upload_summary_counts":{
         "freight_rate": ["freight_rate:view"],
         "tariff_rate": ["tariff_rate:view"],
+        "item_master": ["item_master:view"]
     },
  
     "get_feature_template":{
@@ -141,6 +149,7 @@ API_PERMISSIONS = {
     "list_uploads":{
         "freight_rate": ["freight_rate:view"],
         "tariff_rate": ["tariff_rate:view"],
+        "item_master":["item_master:view"],
     },
 
     "raise_request": ["request:create"],

@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 from pydantic_core import PydanticCustomError
+from typing import Optional
 
 def format_field_name(field_name: str) -> str:
     """Convert snake_case field names to readable format."""
@@ -119,3 +120,16 @@ def check_date_range(valid_from: datetime | None, valid_to: datetime | None) -> 
                 'date_past',
                 f"End date {valid_to.date()} should not be earlier than today ({today})"
             )
+            
+def check_alpha_str(value: Optional[str], field_name: str) -> Optional[str]:
+    """Validate string contains only alphabets, spaces, and commas (nullable-safe)."""
+    if value is None or value.strip() == "":
+        return value
+
+    pattern = r"^[a-zA-Z\s,]+$"
+    if not re.match(pattern, value):
+        raise PydanticCustomError(
+            'string_pattern',
+            f"{field_name} should contain only alphabets, spaces, or commas"
+        )
+    return value
