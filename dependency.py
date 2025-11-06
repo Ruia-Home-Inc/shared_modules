@@ -3,6 +3,8 @@ import logging
 from datetime import datetime, timezone
 from uuid import UUID
 
+from app.shared_modules.open_search.manager import OpenSearchManager
+from fastapi import Request
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, ExpiredSignatureError, jwt
@@ -148,3 +150,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                           detail=f"Internal server error: {str(e)}",
                           headers={"WWW-Authenticate": "Bearer"})
+        
+async def get_opensearch_manager(request: Request) -> OpenSearchManager:
+    """
+    Dependency to retrieve the OpenSearchManager from FastAPI app state.
+    """
+    return request.app.state.opensearch_manager
+
+async def get_opensearch_manager_direct() -> OpenSearchManager:
+    return OpenSearchManager()
