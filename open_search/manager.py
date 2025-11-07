@@ -1,5 +1,6 @@
 from app.api.common.enums.upload_features import FeatureType
 from opensearchpy import OpenSearch, RequestsHttpConnection
+from opensearchpy.exceptions import NotFoundError
 import asyncio
 from fastapi import HTTPException
 import time
@@ -180,3 +181,30 @@ class OpenSearchManager:
         from opensearchpy.helpers import bulk
         success, errors = bulk(self.client, actions, raise_on_error=False)
         return success, errors
+    
+    async def get(self, index: str, doc_id: str) -> dict:
+            """
+            Fetch a single document from OpenSearch by ID.
+            Returns the full document source if found.
+            """
+
+            try:
+                start = time.time()
+                print(f"🔍 Fetching document '{doc_id}' from index '{index}'")
+
+                response = await asyncio.to_thread(
+                    self.client.get,
+                    index=index,
+                    id=doc_id
+                )
+
+                doc_source = response.get("_source", {})
+                print(f"✅ Retrieved doc {doc_id} in {time.time() - start:.2f}s")
+                return doc_source
+
+            except NotFoundError:
+                print(f"⚠️ Document {doc_id} not found in index '{index}'")
+                return None
+            except Exception as e:
+                print(f"❌ Failed to fetch document {doc_id} from OpenSearch: {e}")
+                raise HTTPException(status_code=500, detail=str(e))
