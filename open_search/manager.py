@@ -1,5 +1,6 @@
 from app.api.common.enums.upload_features import FeatureType
 from opensearchpy import OpenSearch, RequestsHttpConnection, exceptions as os_exceptions
+from opensearchpy.exceptions import NotFoundError
 import asyncio
 from fastapi import HTTPException
 import time
